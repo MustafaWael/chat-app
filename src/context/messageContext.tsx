@@ -1,7 +1,5 @@
 import { createContext, type ReactNode } from "react";
 import useMessage from "@/hooks/message";
-import useAuth from "@/hooks/auth";
-import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 
 export interface Message {
@@ -38,14 +36,17 @@ export const initialMessageContext: MessageContext = {
   updateMessage: () => {},
 };
 
+interface MessageProviderProps {
+  children: ReactNode;
+  token: string;
+}
+
 export const MessageContext = createContext<MessageContext>(
   initialMessageContext
 );
 
-export const MessageProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
+export const MessageProvider = ({ children, token }: MessageProviderProps) => {
   const router = useRouter();
-  const token = (user?.token || getCookie("token")) as string;
   const { chatId } = router.query as { chatId: string };
 
   const value = useMessage({ token, chatId });

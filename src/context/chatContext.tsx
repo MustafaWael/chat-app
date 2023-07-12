@@ -1,7 +1,5 @@
 import { createContext, type ReactNode } from "react";
 import useChat from "@/hooks/chat";
-import useAuth from "@/hooks/auth";
-import { getCookie } from "cookies-next";
 import { Message } from "./messageContext";
 
 export interface Participant {
@@ -38,11 +36,15 @@ export const initialChatContext: ChatContext = {
   deleteChat: () => {},
 };
 
+interface ChatProviderProps {
+  children: ReactNode;
+  token: string;
+}
+
 export const ChatContext = createContext<ChatContext>(initialChatContext);
 
-export const ChatProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
-  const token = (user?.token || getCookie("token")) as string;
+export const ChatProvider = ({ children, token }: ChatProviderProps) => {
   const value = useChat(token);
+
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
