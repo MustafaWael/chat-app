@@ -1,6 +1,8 @@
 import { api } from "@/api";
 import { Message, MessageContext } from "@/context/messageContext";
+import { SocketContext } from "@/context/socket";
 import { useState } from "react";
+import { useContext, useEffect } from "react";
 
 interface MessageHook {
   token: string;
@@ -15,6 +17,8 @@ export default function useMessage({
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { socket } = useContext(SocketContext);
 
   // actions
   const getMessages = async () => {
@@ -98,9 +102,22 @@ export default function useMessage({
     }
   };
 
-  const sendMessage = (message: string, chatId: string) => {};
+  const sendMessage = (message: string, chatId: string) => {
+    socket?.emit("message", { message, chatId });
+  };
 
   const editMessage = (message: string, chatId: string) => {};
+
+  // Call onReceiveMessage when socket is ready
+  useEffect(() => {
+    const onReceiveMessage = () => {
+      socket?.on("message", (message) => {
+        console.log(message);
+      });
+    };
+
+    onReceiveMessage();
+  }, [socket]);
 
   return {
     messages,
