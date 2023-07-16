@@ -3,18 +3,38 @@ import { ReactNode, createContext } from "react";
 import { Socket } from "socket.io-client";
 
 interface Message {
+  _id: string;
+  sender: { _id: string };
+  receiver: { _id: string };
+  chatId: string;
+  message: string;
+  status: "pending" | "sent" | "read";
+  timeStamp: Date;
+}
+
+interface MessageFromClient {
   message: string;
   chatId: string;
+  timeStamp: Date;
 }
-
 export interface ServerToClientEvents {
   message(message: Message): void;
-  online(userId: string): void;
+  online({ userId, isOnline }: { userId: string; isOnline: boolean }): void;
+  getOnlineSocket({
+    userId,
+    isOnline,
+  }: {
+    userId: string;
+    isOnline: boolean;
+  }): void;
 }
-
 export interface ClientToServerEvents {
-  message: (message: Message) => void;
+  message: (message: MessageFromClient) => void;
   online: (data: { isOnline: boolean; userId: string }) => void;
+  getOnlineSocket: (
+    data: { userId: string },
+    response: (data: { isOnline: boolean; userId: string }) => void
+  ) => void;
 }
 
 export interface SocketContext {

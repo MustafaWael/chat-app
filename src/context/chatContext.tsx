@@ -1,6 +1,7 @@
 import { createContext, type ReactNode } from "react";
 import useChat from "@/hooks/chat";
 import { Message } from "./messageContext";
+import { User } from "./authContext";
 
 export interface Participant {
   _id: string;
@@ -14,15 +15,22 @@ export interface Chat {
   messages: Message["_id"][];
 }
 
+export interface ChatMapped {
+  _id: string;
+  participant: Participant;
+  lastMessage: Message["message"] | undefined;
+}
+
 export interface ChatContext {
-  chats: Chat[];
-  chat: Chat | null;
+  chats: ChatMapped[];
+  chat: ChatMapped | null;
   loading: boolean;
   error: string | null;
   getChats: () => void;
-  getChat: (id: string) => void;
+  getChat: () => void;
   createChat: (participants: Participant["_id"][]) => void;
   deleteChat: (id: string) => void;
+  searchChats: (participantName: Participant["name"]) => void;
 }
 
 export const initialChatContext: ChatContext = {
@@ -34,17 +42,19 @@ export const initialChatContext: ChatContext = {
   getChat: () => {},
   createChat: () => {},
   deleteChat: () => {},
+  searchChats: () => {},
 };
 
 interface ChatProviderProps {
   children: ReactNode;
   token: string;
+  user: User;
 }
 
 export const ChatContext = createContext<ChatContext>(initialChatContext);
 
-export const ChatProvider = ({ children, token }: ChatProviderProps) => {
-  const value = useChat(token);
+export const ChatProvider = ({ children, token, user }: ChatProviderProps) => {
+  const value = useChat(token, user);
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
