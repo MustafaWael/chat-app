@@ -1,25 +1,37 @@
 import { api } from "@/api";
-import { Chat, ChatContext, Participant } from "@/context/chatContext";
-import { useState } from "react";
+import {
+  Chat,
+  ChatContext,
+  ChatMapped,
+  Participant,
+} from "@/context/chatContext";
+import { chatsMapper } from "@/utils";
+import { useState, useEffect, useCallback } from "react";
+import { User } from "@/context/authContext";
+import { useRouter } from "next/router";
 
-export default function useChat(token: string): ChatContext {
+export default function useChat(token: string, user: User): ChatContext {
   // state
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [chat, setChat] = useState<Chat | null>(null);
+  const [chats, setChats] = useState<ChatMapped[]>([]);
+  const [chat, setChat] = useState<ChatMapped | null>(null);
+  const [filteredChats, setFilteredChats] = useState<ChatMapped[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { chatId } = router.query;
 
   // actions
   const getChats = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get(`/chats`, {
+      const { data }: { data: Chat[] } = await api.get(`/chats`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      setChats(data);
+      const chatsMapped = chatsMapper(data, user.email);
+      setChats(chatsMapped);
     } catch (error) {
       setError("Something went wrong");
     } finally {
@@ -27,22 +39,23 @@ export default function useChat(token: string): ChatContext {
     }
   };
 
-  const getChat = async (id: string) => {
+  const getChat = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get(`/chats/${id}`, {
+      if (!chatId) return;
+      const { data } = await api.get(`/chats/${chatId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      setChat(data);
+      const ChatMapped = chatsMapper([data], user.email)[0];
+      setChat(ChatMapped);
     } catch (error) {
       setError("Something went wrong");
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, chatId, user.email]);
 
   const createChat = async (participants: Participant["_id"][]) => {
     setLoading(true);
@@ -69,8 +82,17 @@ export default function useChat(token: string): ChatContext {
 
   const deleteChat = async () => {};
 
+  const searchChats = (participantName: string): void => {
+    const filteredChats = chats.filter((chat) =>
+      chat.participant.name
+        .toLowerCase()
+        .includes(participantName.toLowerCase())
+    );
+    setFilteredChats(filteredChats);
+  };
+
   return {
-    chats,
+    chats: filteredChats.length ? filteredChats : chats,
     chat,
     loading,
     error,
@@ -78,5 +100,6 @@ export default function useChat(token: string): ChatContext {
     getChat,
     createChat,
     deleteChat,
+    searchChats,
   };
 }

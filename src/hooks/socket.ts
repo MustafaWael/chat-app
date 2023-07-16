@@ -8,6 +8,7 @@ export default function useSocket(token: string): SocketContext {
   useEffect(() => {
     const socket = io("http://localhost:4000", {
       auth: { token },
+      autoConnect: false,
     });
 
     setSocket(socket);
