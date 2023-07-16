@@ -13,6 +13,7 @@ export interface RegisterCredentials {
 }
 
 export interface User {
+  _id: string;
   name: string;
   email: string;
 }
