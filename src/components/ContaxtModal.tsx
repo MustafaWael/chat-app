@@ -53,7 +53,7 @@ export default function ContactModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed top-0 left-0 z-20 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-6 rounded-lg">
         <h3 className="text-xl font-semibold">Add Contact</h3>
         <p className="text-gray-400 mb-2">Enter ID of the user</p>

@@ -17,7 +17,7 @@
 }
 
 .ScrollAreaScrollbar {
-  @apply z-50;
+  @apply z-40;
   display: flex;
   /* ensures no selection */
   user-select: none;
