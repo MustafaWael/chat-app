@@ -13,6 +13,10 @@ export default function ChatListHeader() {
 
   const handleLogout = () => {
     logout();
+    socket?.emit("online", {
+      isOnline: false,
+      userId: authUser?.user._id as string,
+    });
     socket?.disconnect();
   };
 

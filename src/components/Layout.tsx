@@ -15,6 +15,15 @@ export default function Layout() {
   useEffect(() => {
     if (!socket) return;
     socket.connect();
+
+    // dissconnect socket on window close or refresh or tap change
+    window.addEventListener("beforeunload", () => {
+      socket.disconnect();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [socket]);
 
   if (isSmallScreen && chatId) {
