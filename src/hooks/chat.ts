@@ -91,6 +91,13 @@ export default function useChat(token: string, user: User): ChatContext {
     setFilteredChats(filteredChats);
   };
 
+  useEffect(() => {
+    if (!chatId) {
+      setChat(null);
+      return;
+    }
+  }, [chatId]);
+
   return {
     chats: filteredChats.length ? filteredChats : chats,
     chat,
