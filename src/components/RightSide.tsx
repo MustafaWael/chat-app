@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
-import { ReactNode, useContext, useEffect, useRef } from "react";
+import { ReactNode, useContext, useEffect, useRef, useState } from "react";
 import ScrollArea from "./ScrollArea";
 import { IoMdArrowBack, IoMdSend } from "react-icons/io";
 import { Message, MessageContext } from "@/context/messageContext";
@@ -57,11 +57,49 @@ export default function RightSide() {
 
 const ChatHeader = ({ name }: { name: User["name"] }) => {
   const router = useRouter();
+  const [isOnline, setIsOnline] = useState(false);
+  const { socket } = useContext(SocketContext);
+  const { chat } = useContext(ChatContext);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("online", ({ userId, isOnline }) => {
+      if (userId === chat?.participant._id) {
+        setIsOnline(isOnline);
+      }
+    });
+
+    return () => {
+      setIsOnline(false);
+    };
+  }, [socket, chat?.participant._id]);
+
+  useEffect(() => {
+    // get online status initially
+    if (!socket) return;
+    socket.emit(
+      "getOnlineSocket",
+      { userId: chat?.participant._id as string },
+      ({ userId, isOnline }) => {
+        if (userId === chat?.participant._id) {
+          setIsOnline(isOnline);
+        }
+      }
+    );
+
+    return () => {
+      // set isOnline to false when component unmounts
+      setIsOnline(false);
+    };
+  }, [socket, chat?.participant._id]);
 
   return (
     <div className="bg-gray-100 p-3 flex items-center gap-x-3 sticky top-0 left-0 w-full">
       {/* back button */}
-      <button className="md:hidden text-gray-500 hover:text-gray-600" onClick={router.back}>
+      <button
+        className="md:hidden text-gray-500 hover:text-gray-600"
+        onClick={router.back}
+      >
         <IoMdArrowBack size={20} />
       </button>
       <div className="w-12 h-12 rounded-full grid place-content-center bg-blue-500 text-white text-xl">
@@ -70,7 +108,7 @@ const ChatHeader = ({ name }: { name: User["name"] }) => {
 
       <div>
         <h3 className="font-semibold capitalize">{name}</h3>
-        {/* <p className="text-sm text-gray-400">Online</p> */}
+        {isOnline && <p className="text-sm text-gray-400">Online</p>}
       </div>
     </div>
   );
