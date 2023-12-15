@@ -30,6 +30,7 @@ export default function useAuth(): AuthContext {
 
       setUser(data);
       setCookie("token", data.token, { maxAge: 30 * 24 * 60 * 60 });
+      setError(null);
     } catch (error) {
       if (error instanceof AxiosError) {
         return setError(error.response?.data.error);
@@ -52,6 +53,7 @@ export default function useAuth(): AuthContext {
 
       setUser(data);
       setCookie("token", data.token, { maxAge: 30 * 24 * 60 * 60 });
+      setError(null);
     } catch (error) {
       if (error instanceof AxiosError) {
         return setError(error.response?.data.error);
@@ -78,6 +80,7 @@ export default function useAuth(): AuthContext {
 
       setUser(null);
       deleteCookie("token");
+      setError(null);
       router.replace("/");
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -107,6 +110,8 @@ export default function useAuth(): AuthContext {
         user: data,
         token: token as string,
       });
+
+      setError(null);
     } catch (error) {
       if (error instanceof AxiosError) {
         return setError(error.response?.data.error);
